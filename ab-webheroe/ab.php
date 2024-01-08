@@ -118,3 +118,60 @@ function abwebheroe_add_clicks() {
 
 }
 add_action( 'wp_ajax_nopriv_click-item', 'abwebheroe_add_clicks' );
+
+/**
+ * Admin section.
+ */
+function abwebheroe_menu_administracion() {
+
+	add_menu_page(
+		'A/B Simple',
+		'A/B Simple',
+		'activate_plugins',
+		'abwebheroe',
+		'abwebheroe_simple', // callback.
+		'',
+		'5'
+	);
+
+}
+add_action( 'admin_menu', 'abwebheroe_menu_administracion' );
+
+/**
+ * Admin control callback.
+ */
+function abwebheroe_simple() {
+
+	$original = get_option( 'abwebheroe-original' );
+	$version_b = get_option( 'abwebheroe-b' );
+	$visit_counter = get_option( 'abwebheroe-count' );
+
+	?>
+	<div id="ab-data">
+		<h2>Versión original: </h2>
+		<p><?php echo esc_html( $original ); ?></span>
+		<h2>Versión B: </h2>
+		<p><?php echo esc_html( $version_b ); ?></span>
+		<h2>Visitas totales: </h2>
+		<p><?php echo esc_html( $visit_counter ); ?></p>
+	</div>
+	<?php
+}
+
+/**
+ * Dashicon.
+ */
+function abwebheroe_icon_menu() {
+	?>
+<style>
+	#ab-data p, #ab-data h2 {
+		margin: 0 0 5px;
+	}
+
+	#adminmenu #toplevel_page_abwebheroe .dashicons-before:before {
+		content: "\f184";
+	}
+</style>
+	<?php
+}
+add_action( 'admin_head', 'abwebheroe_icon_menu' );
