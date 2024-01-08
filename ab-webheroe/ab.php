@@ -13,7 +13,7 @@
 /**
  * Evitamos que los cacos virtuales entren en este archivo de forma externa.
  */
-if ( ! defined('ABSPATH') ) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit();
 }
 
@@ -79,7 +79,7 @@ function abwebheroe_addevents() {
 
 				$.ajax( {
 					type: 'POST',
-					url: '<?php echo admin_url() . 'admin-ajax.php' ?>',
+					url: '<?php echo admin_url() . 'admin-ajax.php'; ?>',
 					data: data,
 					/* success: function(response) {
 						console.log(version);
@@ -102,8 +102,8 @@ function abwebheroe_add_clicks() {
 
 	if ( isset( $_POST['version'] ) ){
 		// Con los datos obtenidos creamos el nombre de la option.
-		$version = sanitize_text_field( $_POST['version'] );
-		$option_name = 'abwebheroe-' . $version;
+		$version      = sanitize_text_field( $_POST['version'] );
+		$option_name  = 'abwebheroe-' . $version;
 		$option_value = get_option( $option_name );
 
 		// Obtenemos el valor anterior y sumamos 1 para añadir el click.
@@ -133,7 +133,6 @@ function abwebheroe_menu_administracion() {
 		'',
 		'5'
 	);
-
 }
 add_action( 'admin_menu', 'abwebheroe_menu_administracion' );
 
