@@ -8,6 +8,8 @@
  * Version: 1.0
  * License: GPLv2 or later
  * Text Domain: abwebheroe
+ *
+ * @package ABWebheroe
  */
 
 /**
@@ -34,6 +36,10 @@ register_activation_hook( __FILE__, 'abwebheroe_activation' );
 
 /**
  * Modificador de versiones.
+ *
+ * @param string $content Contenido del post.
+ *
+ * @return string
  */
 function abwebheroe_modificator( $content ) {
 
@@ -45,7 +51,7 @@ function abwebheroe_modificator( $content ) {
 	}
 
 	// Sumamos 1 y actualizamos.
-	update_option( 'abwebheroe-count', $recuento + 1 );
+	update_option( 'abwebheroe-count', ++$recuento );
 
 	return $content;
 }
@@ -55,55 +61,66 @@ add_filter( 'the_content', 'abwebheroe_modificator' );
  * Añadir eventos.
  */
 function abwebheroe_addevents() {
-
-	if ( is_front_page() ) {
-		?>
-
-		<script>
-		jQuery( document ).ready( function($) {
-			$( '.button-testab' ).click( function(){
-				let button = $(this);
-
-				let version;
-				if ( button.hasClass( 'testab-b' ) ) {
-					version = 'b';
-				} else if ( button.hasClass( 'testab-original' ) ) {
-					version = 'original';
-				}
-
-				// Datos a enviar al servidor.
-				let data = {
-					'action': 'click-item',
-					'version': version
-				};
-
-				$.ajax( {
-					type: 'POST',
-					url: '<?php echo admin_url() . 'admin-ajax.php'; ?>',
-					data: data,
-					/* success: function(response) {
-						console.log(version);
-						console.log(response);
-					} */
-				} );
-			} )
-		} )
-		</script>
-
-		<?php
+	if ( ! is_front_page() ) {
+		return;
 	}
+
+	$js_code = <<<'CL'
+	jQuery( document ).ready( function( $ ) {
+		$( '.button-testab' ).click( function() {
+			let button = $(this);
+
+			let version;
+			if ( button.hasClass( 'testab-b' ) ) {
+				version = 'b';
+			} else if ( button.hasClass( 'testab-original' ) ) {
+				version = 'original';
+			}
+
+			// Datos a enviar al servidor.
+			let data = {
+				'action': 'click-item',
+				'version': version
+			};
+
+			$.ajax( {
+				type: 'POST',
+				url: '
+CL;
+
+	$js_code .= esc_url( admin_url() . 'admin-ajax.php' );
+
+	$js_code .= <<<'CL'
+				data: data,
+				/* success: function(response) {
+					console.log(version);
+					console.log(response);
+				} */
+			} );
+		} )
+	} )
+CL;
+
+	wp_register_script( 'abwebheroe-addevents-js-footer', '', array( 'jquery' ), null, true ); // phpcs:ignore
+	wp_enqueue_script( 'abwebheroe-addevents-js-footer' );
+	wp_add_inline_script( 'abwebheroe-addevents-js-footer', $js_code );
 }
-add_action( 'wp_footer', 'abwebheroe_addevents' );
+add_action( 'wp_enqueue_scripts', 'abwebheroe_addevents' );
 
 /**
  * Añadir nuevos clics a la base de datos.
  */
 function abwebheroe_add_clicks() {
+	if ( ! empty( $_POST['version'] ) ) { // phpcs:ignore
+		if ( 'b' === $_POST['version'] ) { // phpcs:ignore
+			$option_name = 'abwebheroe-b';
+		} elseif ( 'original' === $_POST['version'] ) { // phpcs:ignore
+			$option_name = 'abwebheroe-original';
+		} else {
+			return;
+		}
 
-	if ( isset( $_POST['version'] ) ){
-		// Con los datos obtenidos creamos el nombre de la option.
-		$version      = sanitize_text_field( $_POST['version'] );
-		$option_name  = 'abwebheroe-' . $version;
+		// Con los datos obtenidos recuperamos el option.
 		$option_value = get_option( $option_name );
 
 		// Obtenemos el valor anterior y sumamos 1 para añadir el click.
@@ -111,11 +128,7 @@ function abwebheroe_add_clicks() {
 
 		// Actualizamos la base de datos con el valor añadido del nuevo click.
 		update_option( $option_name, $click );
-
-		/* wp_send_json( get_option( $option_name ) );
-		die(); */
 	}
-
 }
 add_action( 'wp_ajax_nopriv_click-item', 'abwebheroe_add_clicks' );
 
@@ -130,7 +143,7 @@ function abwebheroe_menu_administracion() {
 		'activate_plugins',
 		'abwebheroe',
 		'abwebheroe_simple', // callback.
-		'',
+		'dashicons-chart-pie',
 		'5'
 	);
 }
@@ -140,9 +153,8 @@ add_action( 'admin_menu', 'abwebheroe_menu_administracion' );
  * Admin control callback.
  */
 function abwebheroe_simple() {
-
-	$original = get_option( 'abwebheroe-original' );
-	$version_b = get_option( 'abwebheroe-b' );
+	$original      = get_option( 'abwebheroe-original' );
+	$version_b     = get_option( 'abwebheroe-b' );
 	$visit_counter = get_option( 'abwebheroe-count' );
 
 	?>
@@ -158,19 +170,13 @@ function abwebheroe_simple() {
 }
 
 /**
- * Dashicon.
+ * Inline menu icon style.
+ *
+ * @return void
  */
-function abwebheroe_icon_menu() {
-	?>
-<style>
-	#ab-data p, #ab-data h2 {
-		margin: 0 0 5px;
-	}
+function abwebheroe_icon_menu_style() {
+	$custom_css = '#ab-data p, #ab-data h2 { margin: 0 0 5px; }';
 
-	#adminmenu #toplevel_page_abwebheroe .dashicons-before:before {
-		content: "\f184";
-	}
-</style>
-	<?php
+	wp_add_inline_style( 'icon-menu-style', $custom_css );
 }
-add_action( 'admin_head', 'abwebheroe_icon_menu' );
+add_action( 'admin_enqueue_scripts', 'abwebheroe_icon_menu_style' );
