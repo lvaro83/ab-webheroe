@@ -37,7 +37,12 @@ register_activation_hook( __FILE__, 'abwebheroe_activation' );
  */
 function abwebheroe_modificator( $content ) {
 
-	$recuento = intval( get_option( 'abwebheroe-count' ) );
+	if ( ! is_front_page() ) {
+		// Si no es la página de inicio, sal de la función.
+		return;
+	}
+
+	$recuento = get_option( 'abwebheroe-count' );
 
 	// Usamos el operador módulo para obtener el resto de la division.
 	if ( 0 === ( $recuento % 2 ) ) {
@@ -46,7 +51,7 @@ function abwebheroe_modificator( $content ) {
 	}
 
 	// Sumamos 1 y actualizamos.
-	update_option( 'abwebheroe-count', $recuento++ );
+	update_option( 'abwebheroe-count', ++$recuento );
 
 	return $content;
 }
@@ -57,43 +62,41 @@ add_filter( 'the_content', 'abwebheroe_modificator' );
  */
 function abwebheroe_addevents() {
 
-	if ( is_front_page() ) {
-		?>
+	if ( ! is_front_page() ) {
+		// Si no es la página de inicio, salte de la función.
+		return;
+	}
+	?>
 
-		<script>
-		jQuery( document ).ready( function($) {
-			$( '.button-testab' ).click( function(){
-				let button = $(this);
+	<script>
+	jQuery( document ).ready( function($) {
+		$( '.button-testab' ).click( function(){
+			let button = $(this);
 
-				let version;
-				if ( button.hasClass( 'testab-b' ) ) {
-					version = 'b';
-				} else if ( button.hasClass( 'testab-original' ) ) {
-					version = 'original';
-				}
+			let version;
+			if ( button.hasClass( 'testab-b' ) ) {
+				version = 'b';
+			} else if ( button.hasClass( 'testab-original' ) ) {
+				version = 'original';
+			}
 
-				// Datos a enviar a la base de datos.
-				let data = {
-					'action': 'click-item',
-					'version': version
-				};
+			// Datos a enviar a la base de datos.
+			let data = {
+				'action': 'click-item',
+				'version': version
+			};
 
-				// Enviando a la base de datos.
-				$.ajax( {
-					type: 'POST',
-					url: '<?php echo admin_url() . 'admin-ajax.php'; ?>',
-					data: data,
-					/* success: function(response) {
-						console.log(version);
-						console.log(response);
-					} */
-				} );
+			// Enviando a la base de datos.
+			$.ajax( {
+				type: 'POST',
+				url: '<?php echo admin_url() . 'admin-ajax.php'; ?>',
+				data: data,
 			} )
 		} )
-		</script>
+	} )
+	</script>
 
-		<?php
-	}
+	<?php
 }
 add_action( 'wp_footer', 'abwebheroe_addevents' );
 
@@ -106,16 +109,10 @@ function abwebheroe_add_clicks() {
 		// Con los datos obtenidos creamos el nombre de la option.
 		$version      = sanitize_text_field( $_POST['version'] );
 		$option_name  = 'abwebheroe-' . $version;
-		$option_value = get_option( $option_name );
-
-		// Obtenemos el valor anterior y sumamos 1 para añadir el click.
-		$click = intval( $option_value ) + 1;
+		$option_value = intval( get_option( $option_name ) );
 
 		// Actualizamos la base de datos con el valor añadido del nuevo click.
-		update_option( $option_name, $click );
-
-		/* wp_send_json( get_option( $option_name ) );
-		die(); */
+		update_option( $option_name, ++$option_value );
 	}
 }
 add_action( 'wp_ajax_nopriv_click-item', 'abwebheroe_add_clicks' );
