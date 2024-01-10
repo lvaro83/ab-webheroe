@@ -91,6 +91,7 @@ CL;
 	$js_code .= esc_url( admin_url() . 'admin-ajax.php' );
 
 	$js_code .= <<<'CL'
+				',
 				data: data,
 				/* success: function(response) {
 					console.log(version);
