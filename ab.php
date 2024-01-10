@@ -39,13 +39,14 @@ function abwebheroe_modificator( $content ) {
 
 	$recuento = intval( get_option( 'abwebheroe-count' ) );
 
+	// Usamos el operador módulo para obtener el resto de la division.
 	if ( 0 === ( $recuento % 2 ) ) {
 		// Es versión B, entonces modificamos el contenido.
 		$content = str_replace( 'testab-original', 'testab-b', $content );
 	}
 
 	// Sumamos 1 y actualizamos.
-	update_option( 'abwebheroe-count', $recuento + 1 );
+	update_option( 'abwebheroe-count', $recuento++ );
 
 	return $content;
 }
@@ -71,12 +72,13 @@ function abwebheroe_addevents() {
 					version = 'original';
 				}
 
-				// Datos a enviar al servidor.
+				// Datos a enviar a la base de datos.
 				let data = {
 					'action': 'click-item',
 					'version': version
 				};
 
+				// Enviando a la base de datos.
 				$.ajax( {
 					type: 'POST',
 					url: '<?php echo admin_url() . 'admin-ajax.php'; ?>',
@@ -100,7 +102,7 @@ add_action( 'wp_footer', 'abwebheroe_addevents' );
  */
 function abwebheroe_add_clicks() {
 
-	if ( isset( $_POST['version'] ) ){
+	if ( ! empty( $_POST['version'] ) ){
 		// Con los datos obtenidos creamos el nombre de la option.
 		$version      = sanitize_text_field( $_POST['version'] );
 		$option_name  = 'abwebheroe-' . $version;
@@ -115,7 +117,6 @@ function abwebheroe_add_clicks() {
 		/* wp_send_json( get_option( $option_name ) );
 		die(); */
 	}
-
 }
 add_action( 'wp_ajax_nopriv_click-item', 'abwebheroe_add_clicks' );
 
@@ -130,7 +131,7 @@ function abwebheroe_menu_administracion() {
 		'activate_plugins',
 		'abwebheroe',
 		'abwebheroe_simple', // callback.
-		'',
+		'dashicons-chart-pie',
 		'5'
 	);
 }
@@ -141,11 +142,16 @@ add_action( 'admin_menu', 'abwebheroe_menu_administracion' );
  */
 function abwebheroe_simple() {
 
-	$original = get_option( 'abwebheroe-original' );
-	$version_b = get_option( 'abwebheroe-b' );
+	$original      = get_option( 'abwebheroe-original' );
+	$version_b     = get_option( 'abwebheroe-b' );
 	$visit_counter = get_option( 'abwebheroe-count' );
 
 	?>
+	<style>
+	#ab-data p, #ab-data h2 {
+		margin: 0 0 5px;
+	}
+	</style>
 	<div id="ab-data">
 		<h2>Versión original: </h2>
 		<p><?php echo esc_html( $original ); ?></span>
@@ -156,21 +162,3 @@ function abwebheroe_simple() {
 	</div>
 	<?php
 }
-
-/**
- * Dashicon.
- */
-function abwebheroe_icon_menu() {
-	?>
-<style>
-	#ab-data p, #ab-data h2 {
-		margin: 0 0 5px;
-	}
-
-	#adminmenu #toplevel_page_abwebheroe .dashicons-before:before {
-		content: "\f184";
-	}
-</style>
-	<?php
-}
-add_action( 'admin_head', 'abwebheroe_icon_menu' );
