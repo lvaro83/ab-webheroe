@@ -56,6 +56,7 @@ function abwebheroe_modificator( $content ) {
 
 	// El operador módulo obtiene el resto de la division.
 	if ( 0 === ( $recuento % 2 ) ) {
+		// La clase CSS testab-original pasa a ser testab-b.
 		$content = str_replace( 'testab-original', 'testab-b', $content );
 	}
 
@@ -66,10 +67,14 @@ function abwebheroe_modificator( $content ) {
 }
 add_filter( 'the_content', 'abwebheroe_modificator' );
 
+
+
 /**
  * Reaccionar a los clics.
  * 
- * Si hacen clic, enviamos la información mediante POST.
+ * Si hacen clic,
+ * reconocemos la versión
+ * y enviamos la información mediante POST.
  */
 function abwebheroe_addevents() {
 
