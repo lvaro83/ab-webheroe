@@ -30,7 +30,7 @@ function abwebheroe_activation() {
 
 	add_option( 'abwebheroe-b', 0, '', 'no' );
 
-	add_option( 'abwebheroe-count', 0, '', 'no' );
+	add_option( 'abwebheroe-visitas', 0, '', 'no' );
 }
 register_activation_hook( __FILE__, 'abwebheroe_activation' );
 
@@ -52,7 +52,7 @@ function abwebheroe_modificator( $content ) {
 	}
 
 	// Obtenemos cantidad de visitas.
-	$recuento = get_option( 'abwebheroe-count' );
+	$recuento = get_option( 'abwebheroe-visitas' );
 
 	// El operador módulo obtiene el resto de la division.
 	if ( 0 === ( $recuento % 2 ) ) {
@@ -61,7 +61,7 @@ function abwebheroe_modificator( $content ) {
 	}
 
 	// Sumamos 1 y actualizamos.
-	update_option( 'abwebheroe-count', ++$recuento );
+	update_option( 'abwebheroe-visitas', ++$recuento );
 
 	return $content;
 }
@@ -88,7 +88,7 @@ function abwebheroe_addevents() {
 	<script>
 	jQuery( document ).ready( function($) {
 
-		$( '.button-testab' ).click( function(){
+		$( '.button-testab' ).click( function() {
 			let button = $(this);
 
 			//Reconocemos la versión.
@@ -127,13 +127,13 @@ add_action( 'wp_footer', 'abwebheroe_addevents' );
  */
 function abwebheroe_add_clicks() {
 
-	if ( ! empty( $_POST['version'] ) && 'click-item' === $_POST['action'] ){
-		// Con los datos obtenidos creamos el nombre de la option.
+	if ( ! empty( $_POST['version'] ) ){
+		// Con los datos obtenidos conocemos el nombre de la caja.
 		$version      = $_POST['version'];
 		$option_name  = 'abwebheroe-' . $version;
 		$option_value = get_option( $option_name );
 
-		// Actualizamos la base de datos con el valor añadido del nuevo click.
+		// Actualizamos la caja con el nuevo click.
 		update_option( $option_name, ++$option_value );
 	}
 }
@@ -144,7 +144,7 @@ add_action( 'wp_ajax_nopriv_click-item', 'abwebheroe_add_clicks' );
 /**************************Zona administración****************************/
 
 /**
- * Admin section.
+ * Creación de menú de administración.
  */
 function abwebheroe_menu_administracion() {
 
@@ -153,7 +153,7 @@ function abwebheroe_menu_administracion() {
 		'A/B Simple',
 		'activate_plugins',
 		'abwebheroe',
-		'abwebheroe_simple', // callback.
+		'abwebheroe_simple', // función para ver los datos.
 		'dashicons-chart-pie',
 		'5'
 	);
@@ -163,14 +163,16 @@ add_action( 'admin_menu', 'abwebheroe_menu_administracion' );
 
 
 /**
- * Admin control callback.
+ * función para ver los datos.
  */
 function abwebheroe_simple() {
 
+	// Obtenemos las 3 cajas.
 	$original      = get_option( 'abwebheroe-original' );
 	$version_b     = get_option( 'abwebheroe-b' );
-	$visit_counter = get_option( 'abwebheroe-count' );
+	$visit_counter = get_option( 'abwebheroe-visitas' );
 
+	// Mostramos los valores.
 	?>
 	<style>
 	#ab-data p, #ab-data h2 {
@@ -179,9 +181,9 @@ function abwebheroe_simple() {
 	</style>
 	<div id="ab-data">
 		<h2>Versión original: </h2>
-		<p><?php echo esc_html( $original ); ?></span>
+		<p><?php echo esc_html( $original ); ?></p>
 		<h2>Versión B: </h2>
-		<p><?php echo esc_html( $version_b ); ?></span>
+		<p><?php echo esc_html( $version_b ); ?></p>
 		<h2>Visitas totales: </h2>
 		<p><?php echo esc_html( $visit_counter ); ?></p>
 	</div>
