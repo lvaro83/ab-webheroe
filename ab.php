@@ -26,6 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function abwebheroe_activation() {
 	// Las options son unas cajas de almacenamiento permanentemente accesibles.
+	// add, get, update.
 	add_option( 'abwebheroe-original', 0, '', 'no' );
 
 	add_option( 'abwebheroe-b', 0, '', 'no' );
