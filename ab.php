@@ -17,36 +17,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit();
 }
 
+
+
 /**
  * Función de activación.
+ * 
+ * Cuando se active este plugin, crea estas 3 cajas.
  */
 function abwebheroe_activation() {
-	// Contador eventos versión original.
+	// Las options son unas cajas de almacenamiento permanentemente accesibles.
 	add_option( 'abwebheroe-original', 0, '', 'no' );
 
-	// Contador eventos versión B.
 	add_option( 'abwebheroe-b', 0, '', 'no' );
 
-	// Contador visitantes.
 	add_option( 'abwebheroe-count', 0, '', 'no' );
 }
 register_activation_hook( __FILE__, 'abwebheroe_activation' );
 
+
+
 /**
  * Modificador de versiones.
+ * 
+ * Cuando se carga la página de inicio
+ * Obtén las visitas
+ * y si es par sustituimos la clase del botón
+ * sumamos 1 a las visitas
  */
 function abwebheroe_modificator( $content ) {
 
 	if ( ! is_front_page() ) {
-		// Si no es la página de inicio, sal de la función.
+		// Si no es la página de inicio, salte de la función.
 		return;
 	}
 
+	// Obtenemos cantidad de visitas.
 	$recuento = get_option( 'abwebheroe-count' );
 
-	// Usamos el operador módulo para obtener el resto de la division.
+	// El operador módulo obtiene el resto de la division.
 	if ( 0 === ( $recuento % 2 ) ) {
-		// Es versión B, entonces modificamos el contenido.
 		$content = str_replace( 'testab-original', 'testab-b', $content );
 	}
 
@@ -58,21 +67,26 @@ function abwebheroe_modificator( $content ) {
 add_filter( 'the_content', 'abwebheroe_modificator' );
 
 /**
- * Añadir eventos.
+ * Reaccionar a los clics.
+ * 
+ * Si hacen clic, enviamos la información mediante POST.
  */
 function abwebheroe_addevents() {
 
 	if ( ! is_front_page() ) {
-		// Si no es la página de inicio, salte de la función.
+		// Si no es la página de inicio, sal de la función.
 		return;
 	}
+
 	?>
 
 	<script>
 	jQuery( document ).ready( function($) {
+
 		$( '.button-testab' ).click( function(){
 			let button = $(this);
 
+			//Reconocemos la versión.
 			let version;
 			if ( button.hasClass( 'testab-b' ) ) {
 				version = 'b';
@@ -86,12 +100,13 @@ function abwebheroe_addevents() {
 				'version': version
 			};
 
-			// Enviando a la base de datos.
+			// Enviando mediante post.
 			$.ajax( {
 				type: 'POST',
 				url: '<?php echo admin_url() . 'admin-ajax.php'; ?>',
 				data: data,
 			} )
+
 		} )
 	} )
 	</script>
@@ -100,22 +115,28 @@ function abwebheroe_addevents() {
 }
 add_action( 'wp_footer', 'abwebheroe_addevents' );
 
+
+
 /**
- * Añadir nuevos clics a la base de datos.
+ * Gestionamos datos recibidos mediante POST.
  */
 function abwebheroe_add_clicks() {
 
-	if ( ! empty( $_POST['version'] ) ){
+	if ( ! empty( $_POST['version'] ) && 'click-item' === $_POST['action'] ){
 		// Con los datos obtenidos creamos el nombre de la option.
-		$version      = sanitize_text_field( $_POST['version'] );
+		$version      = $_POST['version'];
 		$option_name  = 'abwebheroe-' . $version;
-		$option_value = intval( get_option( $option_name ) );
+		$option_value = get_option( $option_name );
 
 		// Actualizamos la base de datos con el valor añadido del nuevo click.
 		update_option( $option_name, ++$option_value );
 	}
 }
 add_action( 'wp_ajax_nopriv_click-item', 'abwebheroe_add_clicks' );
+
+
+
+/**************************Zona administración****************************/
 
 /**
  * Admin section.
@@ -133,6 +154,8 @@ function abwebheroe_menu_administracion() {
 	);
 }
 add_action( 'admin_menu', 'abwebheroe_menu_administracion' );
+
+
 
 /**
  * Admin control callback.
