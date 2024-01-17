@@ -42,7 +42,7 @@ register_activation_hook( __FILE__, 'abwebheroe_activation' );
  * 
  * Cuando se carga la página de inicio
  * Obtén las visitas
- * y si es par sustituimos la clase del botón
+ * y si es par, sustituimos la clase del botón
  * sumamos 1 a las visitas
  */
 function abwebheroe_modificator( $content ) {
@@ -95,9 +95,9 @@ function abwebheroe_addevents() {
 			//Reconocemos la versión.
 			let version;
 			if ( button.hasClass( 'testab-b' ) ) {
-				version = 'b';
+				version = 'abwebheroe-b';
 			} else if ( button.hasClass( 'testab-original' ) ) {
-				version = 'original';
+				version = 'abwebheroe-original';
 			}
 
 			// Datos a enviar a la base de datos.
@@ -130,8 +130,7 @@ function abwebheroe_add_clicks() {
 
 	if ( ! empty( $_POST['version'] ) ){
 		// Con los datos obtenidos conocemos el nombre de la caja.
-		$version      = $_POST['version'];
-		$option_name  = 'abwebheroe-' . $version;
+		$option_name  = $_POST['version'];
 		$option_value = get_option( $option_name );
 
 		// Actualizamos la caja con el nuevo click.
