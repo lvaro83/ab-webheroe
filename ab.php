@@ -65,7 +65,8 @@ function abwebheroe_addevents() {
 		return;
 	}
 
-	$js_code = <<<'CL'
+	$nonce   = wp_create_nonce( 'abwebheroe-nonce' );
+	$js_code = "
 	jQuery( document ).ready( function( $ ) {
 		$( '.button-testab' ).click( function() {
 			let button = $(this);
@@ -77,21 +78,16 @@ function abwebheroe_addevents() {
 				version = 'original';
 			}
 
-			// Datos a enviar al servidor.
+			// Data to send to the server.
 			let data = {
 				'action': 'click-item',
+				'abnonce': '" . $nonce . "',
 				'version': version
 			};
 
 			$.ajax( {
 				type: 'POST',
-				url: '
-CL;
-
-	$js_code .= esc_url( admin_url() . 'admin-ajax.php' );
-
-	$js_code .= <<<'CL'
-				',
+				url: ' " . esc_url( admin_url() . 'admin-ajax.php' ) . " ',
 				data: data,
 				/* success: function(response) {
 					console.log(version);
@@ -99,8 +95,8 @@ CL;
 				} */
 			} );
 		} )
-	} )
-CL;
+	} );
+	";
 
 	wp_register_script( 'abwebheroe-addevents-js-footer', '', array( 'jquery' ), null, true ); // phpcs:ignore
 	wp_enqueue_script( 'abwebheroe-addevents-js-footer' );
@@ -112,10 +108,10 @@ add_action( 'wp_enqueue_scripts', 'abwebheroe_addevents' );
  * Adding new clicks to the database.
  */
 function abwebheroe_add_clicks() {
-	if ( ! empty( $_POST['version'] ) ) { // phpcs:ignore
-		if ( 'b' === $_POST['version'] ) { // phpcs:ignore
+	if ( isset( $_POST['abnonce'] ) && wp_verify_nonce( $_POST['abnonce'], 'abwebheroe-nonce' ) && ! empty( $_POST['version'] ) ) {
+		if ( 'b' === $_POST['version'] ) {
 			$option_name = 'abwebheroe-b';
-		} elseif ( 'original' === $_POST['version'] ) { // phpcs:ignore
+		} elseif ( 'original' === $_POST['version'] ) {
 			$option_name = 'abwebheroe-original';
 		} else {
 			return;
