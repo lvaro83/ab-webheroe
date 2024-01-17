@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Simple A/B test plugin
  * Plugin Uri: https://webheroe.com/
- * Description: Plugin básico para tests A/B
+ * Description: Basic plugin for A/B tests.
  * Author: Álvaro Torres
  * Author URI: https://webheroe.com/
  * Version: 1.0
@@ -13,31 +13,31 @@
  */
 
 /**
- * Evitamos que los cacos virtuales entren en este archivo de forma externa.
+ * We prevent virtual thieves from entering this file externally.
  */
 if ( ! defined( 'ABSPATH' ) ) {
 	exit();
 }
 
 /**
- * Función de activación.
+ * Activation function.
  */
 function abwebheroe_activation() {
-	// Contador eventos versión original.
+	// Event counter original version.
 	add_option( 'abwebheroe-original', 0, '', 'no' );
 
-	// Contador eventos versión B.
+	// Event counter version B.
 	add_option( 'abwebheroe-b', 0, '', 'no' );
 
-	// Contador visitantes.
+	// Visitor counter.
 	add_option( 'abwebheroe-count', 0, '', 'no' );
 }
 register_activation_hook( __FILE__, 'abwebheroe_activation' );
 
 /**
- * Modificador de versiones.
+ * Versions modifier.
  *
- * @param string $content Contenido del post.
+ * @param string $content Post content.
  *
  * @return string
  */
@@ -46,11 +46,11 @@ function abwebheroe_modificator( $content ) {
 	$recuento = intval( get_option( 'abwebheroe-count' ) );
 
 	if ( 0 === ( $recuento % 2 ) ) {
-		// Es versión B, entonces modificamos el contenido.
+		// It is version B, so we modify the content.
 		$content = str_replace( 'testab-original', 'testab-b', $content );
 	}
 
-	// Sumamos 1 y actualizamos.
+	// We add 1 and update.
 	update_option( 'abwebheroe-count', ++$recuento );
 
 	return $content;
@@ -58,7 +58,7 @@ function abwebheroe_modificator( $content ) {
 add_filter( 'the_content', 'abwebheroe_modificator' );
 
 /**
- * Añadir eventos.
+ * Add events.
  */
 function abwebheroe_addevents() {
 	if ( ! is_front_page() ) {
@@ -109,7 +109,7 @@ CL;
 add_action( 'wp_enqueue_scripts', 'abwebheroe_addevents' );
 
 /**
- * Añadir nuevos clics a la base de datos.
+ * Adding new clicks to the database.
  */
 function abwebheroe_add_clicks() {
 	if ( ! empty( $_POST['version'] ) ) { // phpcs:ignore
@@ -121,13 +121,13 @@ function abwebheroe_add_clicks() {
 			return;
 		}
 
-		// Con los datos obtenidos recuperamos el option.
+		// With the data obtained we recover the option.
 		$option_value = get_option( $option_name );
 
-		// Obtenemos el valor anterior y sumamos 1 para añadir el click.
+		// We obtain the above value and add 1 to add the click..
 		$click = intval( $option_value ) + 1;
 
-		// Actualizamos la base de datos con el valor añadido del nuevo click.
+		// We update the database with the added value of the new click..
 		update_option( $option_name, $click );
 	}
 }
@@ -160,11 +160,11 @@ function abwebheroe_simple() {
 
 	?>
 	<div id="ab-data">
-		<h2>Versión original: </h2>
+		<h2><?php esc_html_e( 'Original version:', 'abwebheroe' ); ?></h2>
 		<p><?php echo esc_html( $original ); ?></span>
-		<h2>Versión B: </h2>
+		<h2><?php esc_html_e( 'Version B:', 'abwebheroe' ); ?></h2>
 		<p><?php echo esc_html( $version_b ); ?></span>
-		<h2>Visitas totales: </h2>
+		<h2><?php esc_html_e( 'Total visits:', 'abwebheroe' ); ?></h2>
 		<p><?php echo esc_html( $visit_counter ); ?></p>
 	</div>
 	<?php
